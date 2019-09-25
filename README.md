@@ -1,2 +1,8 @@
 # CapstoneProjectFall2019
-beans
+Computation app.
+
+Feature ideas:
+
+
+
+Project structure plan:
