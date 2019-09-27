@@ -15,3 +15,7 @@ Project structure plan:
 
 - Server/Computation language: Python 3
 
+
+To discuss:
+
+- Are we going to use a framework for the frontend? If so, which one?
