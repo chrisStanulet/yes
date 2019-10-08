@@ -19,3 +19,7 @@ Project structure plan:
 To discuss:
 
 - Are we going to use a framework for the frontend? If so, which one?
+
+
+#Backend
+- Python with Django REST framework for web API
