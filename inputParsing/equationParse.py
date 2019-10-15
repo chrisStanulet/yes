@@ -1,76 +1,64 @@
-operators = ['+', '-', '*', '/', '^']
-validChars = ['.', '|', '(',')']
+from collections import namedtuple
+
+LPAREN, RPAREN = '(',')'
+
+OpProp = namedtuple('OpProp','precedence association')
+
+operators = {
+    '^':OpProp(3,'r'),
+    '*':OpProp(2,'l'),
+    '/':OpProp(2,'l'),
+    '+':OpProp(1,'l'),
+    '-':OpProp(1,'l'),
+    '(':OpProp(9,'l'),
+    ')':OpProp(0,'l'),
+
+}
 
 
-
-def parse(e):
-    result = ''
-    # Split solve
-    e = e.replace(' ','')
-    e = e.split('=')
-    if len(e) != 2:
-        return 'ERR_2EQUAL'
-
-    eqobj = [{}]
-
-    #Simplify
-    # Example: 16-2x=5x+9
-    start = 0
-    stop = 0
-    i = 0
-    expPart = 0
-    for exp in e:
-        for c in exp:
-            if contains(c,operators): # If current char is an operator (Means that we have either found a new value, or the value is at the beginning, and is negative
-                if i > 0: # Add value to equation object when not at first pause.
-                    e = {'val':exp[start:stop]}
-                    eqobj.append(e.copy())
-                    if exp[i-1].isalpha(): # if character before operator is not a number (e.g. a variable,) bind variable to value.
-                        eqobj[len(eqobj)-1]['multBy'] = exp[i-1]
-                start = i
-            else:
-                stop = i+1
-            i +=1
-    expPart+=1
-
-    print(expPart)
+# This helped me understand what was happening: https://rosettacode.org/wiki/Parsing/Shunting-yard_algorithm#Python
+# since Wikipedia's pseudocode was written badly.
 
 
+def shuntingYardAlgorithm(input):
 
-def contains(a, b):
-    res = 0
-    i = 0
-    for char in a:
-        if char in b:
-            res +=1
-        i += 1
+    out, stack = [], []
 
-    if res > 0:
-        return True
-    else:
-        return False
-
-
-def replace(a, b, c):
-    res = ''
-    i = 0
-    for char in a:
-        if char in b:
-            res += c
-        else:
-            res += a[i]
-
-        i += 1
-
-    return res
+    for token in input:
+        if token.isnumeric():
+            out.append(token)
+        elif token in operators:
+            if stack:
+                (tokenPrec, tokenAcc) = operators[token]
+                if len(stack) > 0:  (stackPrec, tokenPrec) = operators[stack[-1]]
+                if token is not LPAREN or RPAREN:
+                    if stackPrec > tokenPrec:
+                        out.append(stack.pop())
+                    elif stackPrec <=  tokenPrec:
+                        out.append(token)
+                else:
+                    if token is LPAREN:
+                        stack.append(token)
+                    elif token is RPAREN:
+                        while stack and stack[-1] is not LPAREN:
+                            out.append(stack.pop())
+                        if stack and stack[-1] is LPAREN:
+                            stack.pop()
+    while stack:
+        out.append(stack.pop())
+    return out;
 
 
 
 
 
-#TESTING
-equation = input("Enter Equation\n")
 
-parse(equation)
+print(shuntingYardAlgorithm('3+4*2/(1-5)^2^3'))
 
-# parse(equation)
+
+
+
+
+
+
+
