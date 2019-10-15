@@ -1,118 +1,64 @@
-operators = ['+', '-', '*', '/', '^']
-validChars = ['.', '|', '(', ')']
-functions = ["sin", "cos", "tan", "sqrt", "asin", "acos", "atan"]
+from collections import namedtuple
+
+LPAREN, RPAREN = '(',')'
+
+OpProp = namedtuple('OpProp','precedence association')
+
+operators = {
+    '^':OpProp(3,'r'),
+    '*':OpProp(2,'l'),
+    '/':OpProp(2,'l'),
+    '+':OpProp(1,'l'),
+    '-':OpProp(1,'l'),
+    '(':OpProp(9,'l'),
+    ')':OpProp(0,'l'),
+
+}
 
 
-
-# Example: 16-2x=5x+9
-outputQueue = []
-operatorStack = []
-precedence = {'(':1,'^':2,'m':3,'/':4,'+':5,'-':6}
-def parse(e):
-
-    expressions = e.split('=')
-
-    iterations = 0
-
-    for exp in expressions:
-        for char in exp:
-
-            #If the character is numeric, push to output queue.
-            if char.isnumeric():
-                outputQueue.append(char)
-                exp.pop(iterations)
-
-            #If the character is an operator...
-            if char in operators:
-
-                #While there is an operator on top of the operator stack, there is an operator at the top of the operator stack with greater precedence, or the operator at the top of the operator stack has equal precedence and is left associative
-                while (len(operatorStack) > 0 or hasGreaterPrecedence(char, operatorStack(len(operatorStack)-1)) == 1 or (hasGreaterPrecedence(char, operatorStack(len(operatorStack)-1)) == 0 and operatorStack(len(operatorStack)-1) == '{')) and operatorStack(len(operatorStack)-1) != '(':
-
-                    outputQueue.append(operatorStack.pop(len(operatorStack)-1))
-
-                operatorStack.append(char)
-                exp.pop(iterations)
-
-            if char == '(':
-                operatorStack.append('(')
-                exp.pop(iterations)
-
-            if char == ')':
-                while operatorStack(len(operatorStack)-1) != '(':
-                    outputQueue.append(operatorStack.pop(len(operatorStack)-1))
-
-                if operatorStack(len(operatorStack)-1) == ')':
-                    operatorStack.pop(len(operatorStack)-1)
-
-            iterations += 1
-
-        if operatorStack is not None:
+# This helped me understand what was happening: https://rosettacode.org/wiki/Parsing/Shunting-yard_algorithm#Python
+# since Wikipedia's pseudocode was written badly.
 
 
+def shuntingYardAlgorithm(input):
 
+    out, stack = [], []
 
-
-
-def popAll(a, popToA):
-    i = 0
-    for char in popToA:
-        a.append(a.ppend)
-
-        i+=1
-
-
-
-def hasGreaterPrecedence(a,b):
-
-    if precedence[a] > precedence[b]:
-        return 1
-    else:
-        return -1
+    for token in input:
+        if token.isnumeric():
+            out.append(token)
+        elif token in operators:
+            if stack:
+                (tokenPrec, tokenAcc) = operators[token]
+                if len(stack) > 0:  (stackPrec, tokenPrec) = operators[stack[-1]]
+                if token is not LPAREN or RPAREN:
+                    if stackPrec > tokenPrec:
+                        out.append(stack.pop())
+                    elif stackPrec <=  tokenPrec:
+                        out.append(token)
+                else:
+                    if token is LPAREN:
+                        stack.append(token)
+                    elif token is RPAREN:
+                        while stack and stack[-1] is not LPAREN:
+                            out.append(stack.pop())
+                        if stack and stack[-1] is LPAREN:
+                            stack.pop()
+    while stack:
+        out.append(stack.pop())
+    return out;
 
 
 
 
-def isFunctionOnTop():
 
-    for funct in functions:
-        if operatorStack[len(operatorStack)-1] in funct:
-            return True
-        else:
-            return False
+
+print(shuntingYardAlgorithm('3+4*2/(1-5)^2^3'))
 
 
 
-def contains(a, b):
-    res = 0
-    i = 0
-    for char in a:
-        if char in b:
-            res += 1
-        i += 1
-
-    if res > 0:
-        return True
-    else:
-        return False
 
 
-def replace(a, b, c):
-    res = ''
-    i = 0
-    for char in a:
-        if char in b:
-            res += c
-        else:
-            res += a[i]
-
-        i += 1
-
-    return res
 
 
-# TESTING
-equation = input("Enter Equation\n")
 
-parse(equation)
-
-# parse(equation)
