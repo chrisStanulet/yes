@@ -14,8 +14,7 @@ operators = {
 }
 
 
-# This helped me understand what was happening: https://rosettacode.org/wiki/Parsing/Shunting-yard_algorithm#Python
-# since Wikipedia's pseudocode was written horribly.
+# Algorithm was created with help from https://rosettacode.org/wiki/Parsing/Shunting-yard_algorithm#Python
 
 
 def tokenizeInput(input):
@@ -26,7 +25,7 @@ def tokenizeInput(input):
         if token in operators:
             tokList.append((token, operators[token]))
         elif token.isalpha() and token not in operators:  # IF TOKEN IS A VARIABLE
-            if i > 1 and inp[
+            if i > 0 and inp[
                 i - 1] not in operators:  # IF PREVIOUS TOKEN IS NOT AN OPERATOR, INSERT ASTERISK AND THEN INSERT VARIABLE
                 tokList.append(('*', operators['*']))
                 tokList.append(('NUMBER', token))
@@ -77,23 +76,6 @@ def shuntingYardAlgorithm(input):
     return out
 
 
+inp = input('equation: \n')
 
-
-
-
-
-
-
-
-
-
-
-print(shuntingYardAlgorithm('3+4*2/(1-5)^2^3'))
-
-
-
-
-
-
-
-
+print(shuntingYardAlgorithm(inp))
