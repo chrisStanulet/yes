@@ -1,0 +1,148 @@
+from collections import namedtuple
+from pprint import pprint as pp
+ 
+
+
+#Initialize named tuple and constants
+OpInfo = namedtuple('OpInfo', 'prec assoc')
+L, R = 'Left Right'.split()
+NUM, LPAREN, RPAREN = 'NUMBER ( )'.split()
+
+#NUM = ‘NUMBER’
+#LPAREN = ‘(‘
+#RPAREN = ‘)’
+
+
+#Initialize operator dictionary
+
+ops = {
+ '^': OpInfo(prec=4, assoc=R),
+ '*': OpInfo(prec=3, assoc=L),
+ '/': OpInfo(prec=3, assoc=L),
+ '+': OpInfo(prec=2, assoc=L),
+ '-': OpInfo(prec=2, assoc=L),
+ '(': OpInfo(prec=9, assoc=L),
+ ')': OpInfo(prec=0, assoc=L),
+ }
+ 
+
+ 
+#Input expression goes in… 
+def get_input(inp = None):
+    'Inputs an expression and returns list of (TOKENTYPE, tokenvalue)'
+
+    #If the input is null, prompt user for expression.
+    if inp is None:
+        inp = input('expression: ')
+
+    #Tokens are stripped of spaces and split into a list.
+    tokens = inp.strip().split()
+
+    #Initialize output list
+    tokenvals = []
+    for token in tokens:
+
+
+	  #If the token is an operator, append it’s dictionary value to the list.
+	  # e.g. tokenvals[‘+’] = (2,’l’)
+        if token in ops:
+            tokenvals.append((token, ops[token]))
+        #elif token in (LPAREN, RPAREN):
+        #    tokenvals.append((token, token))
+	  #if the token is numeric, append to tokenvals. E.g. tokenvals[i] = (‘NUMBER’,3)
+        else:
+            tokenvals.append((NUM, token))
+
+    return tokenvals
+ 
+def shunting(tokenvals):
+
+    #initialize output queue and operator stack
+    outq, stack = [], []
+
+    #this is unnecessary
+    table = ['TOKEN,ACTION,RPN OUTPUT,OP STACK,NOTES'.split(',')]
+
+    #token is numeric = token:’NUMBER’, val:(the numeric value)
+    #token is operator = token:(the operator), val: (the operator’s precedence, the operator’s association)
+    for token, val in tokenvals:
+        note = action = ''
+
+	  #If token = ‘NUMBER’
+        if token is NUM:
+    		#append the value to the output queue
+            action = 'Add number to output'
+            outq.append(val)
+
+	  #If the token is an operator
+        elif token in ops:
+
+            currentToken, (currentTokenPrec, currentTokenAssoc) = token, val
+            v = currentToken
+            note = 'Pop ops from stack to output'
+
+		#If the stack is not null…
+            while stack:
+                stackToken, (stackPrec, stackAssoc) = stack[-1]
+
+		    #If the token association is left (not an exponent) and its precedence is <= op precedence on top of stack
+		    #or if the token association is right (an exponent) and it’s precedence is < op precedence on top of stack
+                if (currentTokenAssoc == L and currentTokenPrec <= stackPrec) or (currentTokenAssoc == R and currentTokenPrec < stackPrec):
+
+			#if the current token is not a right parenthesis…
+                    if currentToken != RPAREN:
+				#if token at top of stack is not a left parenthesis, pop stack operator to output queue
+                        if stackToken != LPAREN:
+                            stack.pop()
+                            action = '(Pop op)'
+                            outq.append(stackToken)
+                        else:
+				    #Break out of while stack:, this leads to the right parenthesis being discarded
+                            break
+                    else:
+				#CurrentToken = LPAREN
+				#If the operator at top of op stack is not a left parenthesis, pop stack operator to output queue
+                        if stackToken != LPAREN:
+                            stack.pop()
+                            action = '(Pop op)'
+                            outq.append(stackToken)
+                        else:
+				    #Pop and discard the left parenthesis, then break the loop
+                            stack.pop()
+                            break
+
+                else:
+            	  #if (currentTokenAssoc == L and currentTokenPrec <= stackPrec) or (currentTokenAssoc == R and currentTokenPrec < stackPrec) is false,
+			  #break out of while stack:
+                    break
+		#———END OF WHILE STACK LOOP CODE————
+
+		#if the current token is not a right parenthesis, append operator, (precedence, association) to operator stack
+            if currentToken != RPAREN:
+                stack.append((token, val))
+                action = 'Push op token to stack'
+            else:
+		    #Discard the right parenthesis
+                action = 'Discard ")"'
+    note = 'Drain stack to output'
+    #While the stack still has characters, drain the stack to the operator queue
+    while stack:
+        v = ''
+        stackToken, (stackPrec, stackAssoc) = stack[-1]
+        action = '(Pop op)'
+        stack.pop()
+        outq.append(stackToken)
+        v = note = ''
+    return table
+ 
+if __name__ == '__main__':
+    infix = '3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3'
+    print( 'For infix expression: %r\n' % infix )
+    rp = shunting(get_input(infix))
+    maxcolwidths = [len(max(x, key=len)) for x in zip(*rp)]
+    row = rp[0]
+    print( ' '.join('{cell:^{width}}'.format(width=width, cell=cell) for (width, cell) in zip(maxcolwidths, row)))
+    for row in rp[1:]:
+        print( ' '.join('{cell:<{width}}'.format(width=width, cell=cell) for (width, cell) in zip(maxcolwidths, row)))
+ 
+    print('\n The final output RPN is: %r' % rp[-1][2])

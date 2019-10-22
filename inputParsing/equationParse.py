@@ -15,10 +15,13 @@ operators = {
 
 
 # Algorithm was created with help from https://rosettacode.org/wiki/Parsing/Shunting-yard_algorithm#Python
+# WRITTEN BY ANGELO DELUCA
 
+# Planned modifications:
+# - Add trig function parsing capability
 
 def tokenizeInput(input):
-    inp = input
+    inp = splitArr(input)
     tokList = []
     i = 0
     for token in inp:
@@ -34,7 +37,6 @@ def tokenizeInput(input):
         else:
             tokList.append(('NUMBER', token))
         i += 1
-        print(tokList)
     return tokList;
 
 
@@ -75,7 +77,27 @@ def shuntingYardAlgorithm(input):
 
     return out
 
+def rpnToString(exp):
 
-inp = input('equation: \n')
+    output = ''
+    for token in exp:
+        if type(token) == tuple:
+            output += ' ' + str(token[0])
+        else:
+            output += token
 
-print(shuntingYardAlgorithm(inp))
+    return output;
+
+
+def splitArr(input):
+    out = []
+    num = '';
+    for char in input:
+        if (not char.isnumeric()) and (char is not '.'):
+            if num is not '':
+                out.append(num)
+                num = ''
+            out.append(char)
+        else:
+            num = num + char;
+    return out
