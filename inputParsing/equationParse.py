@@ -21,10 +21,9 @@ operators = {
 # - Add trig function parsing capability
 
 def tokenizeInput(input):
-    inp = input.strip().split()
+    inp = splitArr(input)
     tokList = []
     i = 0
-
     for token in inp:
         if token in operators:
             tokList.append((token, operators[token]))
@@ -78,8 +77,8 @@ def shuntingYardAlgorithm(input):
 
     return out
 
-
 def rpnToString(exp):
+
     output = ''
     for token in exp:
         if type(token) == tuple:
@@ -88,3 +87,17 @@ def rpnToString(exp):
             output += token
 
     return output;
+
+
+def splitArr(input):
+    out = []
+    num = '';
+    for char in input:
+        if (not char.isnumeric()) and (char is not '.'):
+            if num is not '':
+                out.append(num)
+                num = ''
+            out.append(char)
+        else:
+            num = num + char;
+    return out
