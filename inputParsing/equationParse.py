@@ -101,4 +101,6 @@ def splitArr(input):
             out.append(char)
         else:
             num = num + char
+
+    if num: out.append(num)
     return out
