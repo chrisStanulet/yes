@@ -80,18 +80,19 @@ def shuntingYardAlgorithm(input):
 def rpnToString(exp):
 
     output = ''
+    x = ''
     for token in exp:
         if type(token) == tuple:
-            output += ' ' + str(token[0])
+            output += x + str(token[0])
         else:
-            output += token
-
+            output += x + token
+        x = ' '
     return output;
 
 
 def splitArr(input):
     out = []
-    num = '';
+    num = ''
     for char in input:
         if (not char.isnumeric()) and (char is not '.'):
             if num is not '':
@@ -99,5 +100,7 @@ def splitArr(input):
                 num = ''
             out.append(char)
         else:
-            num = num + char;
+            num = num + char
+
+    if num: out.append(num)
     return out
